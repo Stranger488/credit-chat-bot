@@ -9,5 +9,4 @@ public class CreditChatBotApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CreditChatBotApplication.class, args);
 	}
-
 }

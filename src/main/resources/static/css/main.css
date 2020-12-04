@@ -1,0 +1,123 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "sans-serif", "Arial", "Times New Roman";
+    font-weight: normal;
+    font-size: 1em;
+}
+
+:root {
+    --main-background-color: #0d0d0d;
+    --main-text-color: #fff;
+    --main-primary-color: #78EE52;
+
+    --light-color: #fff;
+    --chat-background: #2a2a2a;
+    --input-focus: #f3f3f3;
+}
+
+html {
+    min-height: 100vh;
+}
+
+body {
+    background: var(--main-background-color);
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    color: var(--main-text-color);
+}
+
+.chat-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--chat-background);
+}
+
+.chat-message-button {
+    background: var(--main-primary-color);
+    display: inline-block;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 25px;
+    padding: 5px 10px;
+    border: 0;
+    text-transform: uppercase;
+    color: var(--main-background-color);
+    cursor: pointer;
+    outline: 0;;
+    margin-left: 5px;
+}
+
+.chat-message-input {
+    background: var(--light-color);
+    padding: 5px;
+    line-height: 25px;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 50px;
+    outline: none;
+    width: 75%;
+    max-width: 500px;
+}
+
+.chat-message-input:focus {
+    background: var(--input-focus);    
+}
+
+.chat-header {
+    font-size: 1.5em;
+    padding: 15px;
+    text-align: center;
+}
+
+.chat-content {
+    width: 75%;
+    text-align: center;
+    padding: 15px;
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message {
+    width: 45%;
+    border-radius: 50px;
+    background: border-box;
+    padding: 15px;
+    color: var(--main-background-color);
+    margin: 5px 0;
+    word-break: break-all;
+}
+
+.chat-message-left {
+    background: var(--main-primary-color);
+    text-align: left;
+}
+
+.chat-message-right {
+    background: var(--light-color);
+    text-align: right;
+    align-self: flex-end;
+}
+
+.connecting {
+    padding: 15px;
+    font-size: 1.2em;
+}
+
+#chat-message-form {
+    width: 75%;
+    margin: 10px 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hidden {
+    display: none;
+}

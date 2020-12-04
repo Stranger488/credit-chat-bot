@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta name="theme-color" content="#000000"/>
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Чат-бот для заявки на потребительский кредит</title>
+
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+
+        <main class="main-container">
+            <div class="chat-header">
+                <h2>Оформление заявки на потребительский кредит</h2>
+            </div>
+            <div class="chat-container">
+                <div class="chat-content">
+                    <div class="chat-messages"></div>
+                    <div class="connecting">Подключение...</div>
+                </div>
+                <form id="chat-message-form">
+                    <input type="text" class="chat-message-input" placeholder="Введите ответ..."/>
+                    <button type="submit" class="chat-message-button">Отправить</button>
+                </form>
+            </div>
+        </main>
+
+        <script src="js/sockjs.min.js"></script>
+        <script src="js/stomp.min.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>
