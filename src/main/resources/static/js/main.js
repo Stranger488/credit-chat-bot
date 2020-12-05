@@ -20,7 +20,14 @@ const makeConnection = () => {
 const onConnection = () => {
     connectingContainer.classList.add('hidden');
 
-    stompClient.subscribe('/channel', onMessageReceived);
+    stompClient.subscribe('/user/channel', onMessageReceived);
+
+    const chatMessage = {
+        sender: 'client',
+        messageType: 'JOIN',
+        content: 'join'
+    };
+    stompClient.send('/credit-chat-bot/join', {}, JSON.stringify(chatMessage));
 }
 
 const onError = () => {
@@ -33,6 +40,10 @@ const onError = () => {
 
 const onMessageReceived = (message) => {
     const msg = JSON.parse(message.body);
+
+    if (msg.messageType === 'JOIN') {
+        console.log('Joined to the server.');
+    }
 
     const msgContainer = document.createElement('div');
     msgContainer.className = 'chat-message';
@@ -54,7 +65,8 @@ const sendMessageHandler = (event) => {
     if (messageContent && stompClient) {
         const chatMessage = {
             sender: 'client',
-            content: messageContent
+            content: messageContent,
+            messageType: 'SEND'
         };
         stompClient.send('/credit-chat-bot/send', {}, JSON.stringify(chatMessage));
 
