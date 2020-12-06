@@ -21,8 +21,9 @@ public class CreditChatBotController {
     public ChatMessage joinUser(@Payload ChatMessage chatMessage, Principal principal) {
         if (principal != null) {
             String name = principal.getName();
+
             if (name != null) {
-                creditChatBotService.addUserAndSendWelcome(name, chatMessage);
+                creditChatBotService.addUserAndSendWelcome(name);
             }
         }
 
@@ -33,8 +34,9 @@ public class CreditChatBotController {
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage, Principal principal) {
         if (principal != null) {
             String name = principal.getName();
+
             if (name != null) {
-                creditChatBotService.sendMsgToUser(name, chatMessage);
+                creditChatBotService.sendUserMsgToChannel(name, chatMessage);
 
                 creditChatBotService.sendBotMsgToUser(name, chatMessage);
             }

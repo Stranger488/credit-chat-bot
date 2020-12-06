@@ -15,7 +15,7 @@ public class AnonymousUserPrincipal implements Principal {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AnonymousUserPrincipal that = (AnonymousUserPrincipal) o;
-        return name.equals(that.name);
+        return Objects.equals(name, that.name);
     }
 
     @Override

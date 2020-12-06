@@ -7,13 +7,13 @@
 }
 
 :root {
-    --main-background-color: #0d0d0d;
-    --main-text-color: #fff;
-    --main-primary-color: #6cce4a;
-
-    --light-color: #fff;
-    --chat-background: #2a2a2a;
-    --input-focus: #f3f3f3;
+    --main-background-color: #d8d9d987;
+    --main-text-color: #3a3a3a;
+    --main-primary-color: #58b666;
+    --light-color: #6fbced;
+    --chat-background: #ffffffcf;
+    --input-focus: #e2eef5;
+    --box-shadow-primary-color: #5a8e62;
 }
 
 html {
@@ -38,6 +38,7 @@ body {
 
 .chat-message-button {
     background: var(--main-primary-color);
+    transition: box-shadow 0.3s ease-in-out;
     display: inline-block;
     border-radius: 40px;
     font-weight: 500;
@@ -46,15 +47,20 @@ body {
     padding: 5px 10px;
     border: 0;
     text-transform: uppercase;
-    color: var(--main-background-color);
+    color: var(--chat-background);
     cursor: pointer;
     outline: 0;;
     margin-left: 5px;
 }
 
+.chat-message-button:hover {
+    box-shadow: var(--box-shadow-primary-color) 0 0 10px;
+}
+
 .chat-message-input {
-    background: var(--light-color);
-    padding: 5px;
+    background: var(--main-background-color);
+    transition: background 0.3s ease-in-out;
+    padding: 10px;
     line-height: 25px;
     border: none;
     box-sizing: border-box;
@@ -62,6 +68,7 @@ body {
     outline: none;
     width: 75%;
     max-width: 500px;
+    color: var(--main-text-color);
 }
 
 .chat-message-input:focus {
@@ -87,25 +94,39 @@ body {
     flex-direction: column;
 }
 
-.chat-message {
+.chat-message-container {
     width: 45%;
+    max-width: 350px;
+}
+
+.chat-message-container-left {
+    text-align: left;
+}
+
+.chat-message-container-right {
+    text-align: right;
+    align-self: flex-end;
+    word-break: break-all;
+}
+
+.chat-message {
     border-radius: 20px;
     background: border-box;
     padding: 15px;
-    color: var(--main-background-color);
+    color: var(--chat-background);
     margin: 5px 0;
 }
 
 .chat-message-left {
     background: var(--main-primary-color);
-    text-align: left;
 }
 
 .chat-message-right {
     background: var(--light-color);
-    text-align: right;
-    align-self: flex-end;
-    word-break: break-all;
+}
+
+.chat-message-username {
+
 }
 
 .connecting {

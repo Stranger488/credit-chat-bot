@@ -6,22 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatBot {
 
-    public enum State {
-        INIT,
-        IS_BANK_CLIENT,
-        IS_CITIZEN,
-        CITY,
-        AMOUNT_TERM,
-        RATE,
-        AGE,
-        JOB,
-        INCOME
-    }
-
+    private State prevState;
     private State currentState;
 
     public ChatBot() {
-        this.currentState = State.IS_BANK_CLIENT;
+        this.prevState = State.INIT;
+        this.currentState = State.JOIN;
     }
 
     public State getCurrentState() {
@@ -36,53 +26,45 @@ public class ChatBot {
         return messageBuilder.buildMessageFromState(currentState);
     }
 
-    public void processMsg(ChatMessage msg) {
-        String content = msg.getContent();
+    public String getCurrentDeclineMessage(MessageBuilder messageBuilder) {
+        return messageBuilder.buildDeclineMessageFromState(prevState);
+    }
 
-        if (currentState == State.INIT) {
-            this.setCurrentState(State.IS_BANK_CLIENT);
-        } else if (currentState == State.IS_BANK_CLIENT) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.IS_CITIZEN);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.IS_CITIZEN);
-            }
-        } else if (currentState == State.IS_CITIZEN) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.CITY);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.CITY);
-            }
-        } else if (currentState == State.CITY) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.AMOUNT_TERM);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.AMOUNT_TERM);
-            }
-        } else if (currentState == State.AMOUNT_TERM) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.RATE);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.RATE);
-            }
-        } else if (currentState == State.RATE) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.AGE);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.AGE);
-            }
-        } else if (currentState == State.AGE) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.JOB);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.JOB);
-            }
-        } else if (currentState == State.JOB) {
-            if ("Да".equals(content)) {
-                this.setCurrentState(State.INCOME);
-            } else if ("Нет".equals(content)) {
-                this.setCurrentState(State.INCOME);
-            }
+    public String getMsgByState(MessageBuilder messageBuilder, State state) {
+        return messageBuilder.buildMessageFromState(state);
+    }
+
+
+
+    public String processMsg(ChatMessage msg, MessageBuilder msgBuilder) {
+        String content = msg.getContent().trim().toLowerCase();
+
+        State nextState = currentState.processState(content);
+        prevState = currentState;
+        setCurrentState(nextState);
+
+        if (currentState == State.DECLINE) {
+            String curMsg = getCurrentMessage(msgBuilder);
+            return getCurrentDeclineMessage(msgBuilder)+ curMsg;
+        } else if (currentState == State.INIT) {
+            String curMsg = getMsgByState(msgBuilder, currentState); // Get init message
+
+            this.nextState(); // Switch from INIT to IS_BANK_CLIENT
+
+            return curMsg + getCurrentMessage(msgBuilder);
+        } else if (currentState == State.ERROR) {
+            String curMsg = getCurrentMessage(msgBuilder);
+
+            setCurrentState(prevState); // Switch to state, where error was handled
+
+            return curMsg + getCurrentMessage(msgBuilder);
         }
+
+        return getCurrentMessage(msgBuilder);
+    }
+
+    public void nextState() {
+        State nextState = currentState.nextState();
+        setCurrentState(nextState);
     }
 }

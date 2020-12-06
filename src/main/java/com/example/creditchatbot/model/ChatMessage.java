@@ -13,7 +13,8 @@ public class ChatMessage {
     public ChatMessage() {
     }
 
-    public ChatMessage(String sender, String content) {
+    public ChatMessage(String sender, String content, MessageType messageType) {
+        this.messageType = messageType;
         this.sender = sender;
         this.content = content;
     }

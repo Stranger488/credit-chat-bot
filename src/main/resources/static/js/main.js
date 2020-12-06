@@ -46,14 +46,30 @@ const onMessageReceived = (message) => {
     }
 
     const msgContainer = document.createElement('div');
-    msgContainer.className = 'chat-message';
-    msgContainer.innerHTML = msg.content;
-    chatMessages.appendChild(msgContainer)
+    msgContainer.className = 'chat-message-container';
+    chatMessages.appendChild(msgContainer);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'chat-message-username';
+    msgContainer.appendChild(nameSpan);
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-message';
+    msgDiv.innerHTML = msg.content;
+    msgContainer.appendChild(msgDiv);
 
     if (msg.sender === 'server') {
-        msgContainer.classList.add('chat-message-left');
+        nameSpan.innerHTML = 'Чат-бот';
+        msgContainer.classList.add('chat-message-container-left');
+        msgDiv.classList.add('chat-message-left');
+    } else if (msg.sender === 'client') {
+        nameSpan.innerHTML = 'Вы';
+        msgContainer.classList.add('chat-message-container-right');
+        msgDiv.classList.add('chat-message-right');
     } else {
-        msgContainer.classList.add('chat-message-right');
+        nameSpan.innerHTML = 'Неизвестный';
+        msgContainer.classList.add('chat-message-container-left');
+        msgDiv.classList.add('chat-message-left');
     }
 
     chatContent.scrollTop = chatContent.scrollHeight;
