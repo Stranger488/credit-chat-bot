@@ -4,6 +4,7 @@ import com.example.creditchatbot.model.Client;
 import com.example.creditchatbot.model.dto.ChatMessage;
 import com.example.creditchatbot.repository.ClientRepository;
 import com.example.creditchatbot.util.ChatBot;
+import org.hibernate.exception.SQLGrammarException;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -101,13 +102,26 @@ public class CreditChatBotService {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String userName = Objects.requireNonNull(headerAccessor.getUser()).getName();
 
-//        System.out.println("User disconnected : " + username);
-
+        // For usual persistent db
+        /*
         Client client = Objects.requireNonNull(clientRepository.findByGeneratedUniqueName(userName));
         if (client.getJobInfo() == null || client.getGeneratedUniqueName() == null) {
             clientRepository.delete(client);
         }
+        */
+
+        // Handle exception that omits because of using in-memory db
+        try {
+            Client client = Objects.requireNonNull(clientRepository.findByGeneratedUniqueName(userName));
+            if (client.getJobInfo() == null || client.getGeneratedUniqueName() == null) {
+                clientRepository.delete(client);
+            }
+        } catch (SQLGrammarException e) {
+            System.err.println(e.getMessage());
+        }
 
         chatBots.remove(userName);
+
+        //        System.out.println("User disconnected : " + username);
     }
 }
