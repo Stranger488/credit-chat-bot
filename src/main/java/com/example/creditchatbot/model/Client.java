@@ -1,7 +1,7 @@
 package com.example.creditchatbot.model;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -13,6 +13,7 @@ public class Client {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column
     private String generatedUniqueName;
 
     @Column
@@ -25,13 +26,19 @@ public class Client {
     private String middleName;
 
     @Column
-    private Date birthDate;
+    private LocalDate birthDate;
 
     @Column
     private String phone;
 
     @Column
-    private String passportData;
+    private String passportNum;
+
+    @Column
+    private LocalDate passportDate;
+
+    @Column
+    private String passportOrg;
 
     @Column
     private String address;
@@ -40,13 +47,16 @@ public class Client {
     private String jobInfo;
 
     @Column
-    private short creditAmount;
+    private int creditAmount;
 
     @Column
     private int creditTerm;
 
     @Column
     private double creditRate;
+
+    @Column
+    private String city;
 
     public Client() {
     }
@@ -91,11 +101,11 @@ public class Client {
         this.middleName = middleName;
     }
 
-    public Date getBirthDate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 
@@ -107,12 +117,28 @@ public class Client {
         this.phone = phone;
     }
 
-    public String getPassportData() {
-        return passportData;
+    public String getPassportNum() {
+        return passportNum;
     }
 
-    public void setPassportData(String passportData) {
-        this.passportData = passportData;
+    public void setPassportNum(String passportNum) {
+        this.passportNum = passportNum;
+    }
+
+    public LocalDate getPassportDate() {
+        return passportDate;
+    }
+
+    public void setPassportDate(LocalDate passportDate) {
+        this.passportDate = passportDate;
+    }
+
+    public String getPassportOrg() {
+        return passportOrg;
+    }
+
+    public void setPassportOrg(String passportOrg) {
+        this.passportOrg = passportOrg;
     }
 
     public String getAddress() {
@@ -131,11 +157,11 @@ public class Client {
         this.jobInfo = jobInfo;
     }
 
-    public short getCreditAmount() {
+    public int getCreditAmount() {
         return creditAmount;
     }
 
-    public void setCreditAmount(short creditAmount) {
+    public void setCreditAmount(int creditAmount) {
         this.creditAmount = creditAmount;
     }
 
@@ -155,6 +181,14 @@ public class Client {
         this.creditRate = creditRate;
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -170,13 +204,16 @@ public class Client {
                 Objects.equals(middleName, client.middleName) &&
                 Objects.equals(birthDate, client.birthDate) &&
                 Objects.equals(phone, client.phone) &&
-                Objects.equals(passportData, client.passportData) &&
+                Objects.equals(passportNum, client.passportNum) &&
+                Objects.equals(passportDate, client.passportDate) &&
+                Objects.equals(passportOrg, client.passportOrg) &&
                 Objects.equals(address, client.address) &&
-                Objects.equals(jobInfo, client.jobInfo);
+                Objects.equals(jobInfo, client.jobInfo) &&
+                Objects.equals(city, client.city);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, generatedUniqueName, firstName, lastName, middleName, birthDate, phone, passportData, address, jobInfo, creditAmount, creditTerm, creditRate);
+        return Objects.hash(id, generatedUniqueName, firstName, lastName, middleName, birthDate, phone, passportNum, passportDate, passportOrg, address, jobInfo, creditAmount, creditTerm, creditRate, city);
     }
 }

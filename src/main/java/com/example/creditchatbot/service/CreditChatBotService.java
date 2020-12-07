@@ -20,7 +20,6 @@ public class CreditChatBotService {
     private final ClientRepository clientRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    private final HashMap<String, Client> users = new HashMap<>();
     private final HashMap<String, ChatBot> chatBots = new HashMap<>();
 
     public CreditChatBotService(SimpMessagingTemplate simpMessagingTemplate, ClientRepository clientRepository) {
@@ -44,16 +43,11 @@ public class CreditChatBotService {
         chatBot.nextState(); // Switch from JOIN to INIT
         String responseInitString = chatBot.getCurrentMessage();
 
-        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
-        responseMsg.setContent(responseInitString);
-
-        simpMessagingTemplate.convertAndSendToUser(userUniqueName, "/channel", responseMsg);
-
-
         chatBot.nextState(); // Switch from INIT to IS_BANK_CLIENT
         String responseFirstString = chatBot.getCurrentMessage();
 
-        responseMsg.setContent(responseFirstString);
+        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
+        responseMsg.setContent(responseInitString + responseFirstString);
 
         simpMessagingTemplate.convertAndSendToUser(userUniqueName, "/channel", responseMsg);
     }
@@ -65,10 +59,19 @@ public class CreditChatBotService {
     }
 
     public void sendBotMsgToUser(String userName, ChatMessage userMsg) {
-        Client user = users.get(userName);
+        Client client = clientRepository.findByGeneratedUniqueName(userName);
         ChatBot chatBot = chatBots.get(userName);
 
-        String responseString = chatBot.processMsg(userMsg);
+        String responseString = chatBot.processMsg(userMsg, client);
+        if (client.getGeneratedUniqueName() == null) {
+            clientRepository.delete(client);
+
+            Client newClient = new Client();
+            newClient.setGeneratedUniqueName(userName);
+            clientRepository.save(newClient);
+        } else {
+            clientRepository.save(client);
+        }
 
         ChatMessage responseMsg = new ChatMessage();
         responseMsg.setSender("server");
@@ -81,14 +84,13 @@ public class CreditChatBotService {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = Objects.requireNonNull(headerAccessor.getUser()).getName();
+        String userName = Objects.requireNonNull(headerAccessor.getUser()).getName();
 
         Client newClient = new Client();
-        newClient.setGeneratedUniqueName(username);
+        newClient.setGeneratedUniqueName(userName);
         clientRepository.save(newClient);
 
-        users.put(username, newClient);
-        chatBots.put(username, new ChatBot());
+        chatBots.put(userName, new ChatBot());
 
 //        System.out.println("Websocket connection established  " + username);
     }
@@ -96,11 +98,15 @@ public class CreditChatBotService {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = Objects.requireNonNull(headerAccessor.getUser()).getName();
+        String userName = Objects.requireNonNull(headerAccessor.getUser()).getName();
 
 //        System.out.println("User disconnected : " + username);
 
-        users.remove(username);
-        chatBots.remove(username);
+        Client client = clientRepository.findByGeneratedUniqueName(userName);
+        if (client.getJobInfo() == null) {
+            clientRepository.delete(client);
+        }
+
+        chatBots.remove(userName);
     }
 }

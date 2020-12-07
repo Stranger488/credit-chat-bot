@@ -1,5 +1,7 @@
 package com.example.creditchatbot.util;
 
+import com.example.creditchatbot.model.Client;
+
 public interface IState {
     default State nextState() {
         return State.INIT;
@@ -13,7 +15,7 @@ public interface IState {
         return State.ERROR;
     }
 
-    default State processState(String content) {
+    default State processState(String content, Client client) {
         return State.INIT;
     }
 }

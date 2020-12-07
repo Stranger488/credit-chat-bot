@@ -1,5 +1,6 @@
 package com.example.creditchatbot.util;
 
+import com.example.creditchatbot.model.Client;
 import com.example.creditchatbot.model.dto.ChatMessage;
 import com.example.creditchatbot.util.staticDB.ChatBotMessagesDB;
 import org.springframework.stereotype.Component;
@@ -35,20 +36,21 @@ public class ChatBot {
         return ChatBotMessagesDB.buildMessageFromState(state);
     }
 
-    public String processMsg(ChatMessage msg) {
+    public String processMsg(ChatMessage msg, Client client) {
         String content = msg.getContent().trim().toLowerCase();
 
-        State nextState = currentState.processState(content);
+        State nextState = currentState.processState(content, client);
         prevState = currentState;
         setCurrentState(nextState);
 
         if (currentState == State.DECLINE) {
-            String curMsg = getCurrentMessage();
-            return getCurrentDeclineMessage() + curMsg;
+            client.setGeneratedUniqueName(null); // For deleting client from repo
+
+            return getCurrentDeclineMessage() + getCurrentMessage();
         } else if (currentState == State.INIT) {
             String curMsg = getMsgByState(currentState); // Get init message
 
-            this.nextState(); // Switch from INIT to IS_BANK_CLIENT
+            this.nextState(); // Switch from INIT to CITY
 
             return curMsg + getCurrentMessage();
         } else if (currentState == State.ERROR) {

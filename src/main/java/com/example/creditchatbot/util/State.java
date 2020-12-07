@@ -1,5 +1,6 @@
 package com.example.creditchatbot.util;
 
+import com.example.creditchatbot.model.Client;
 import com.example.creditchatbot.util.staticDB.ChatBotMessagesDB;
 import com.example.creditchatbot.util.staticDB.CitiesDB;
 
@@ -27,7 +28,7 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             return this.nextState();
         }
     },
@@ -38,9 +39,11 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[а-я]+(?:[ -][а-я]+)*$")) {
                 if (CitiesDB.isInDb(content)) {
+                    client.setCity(content);
+
                     return this.nextState();
                 }
 
@@ -57,7 +60,7 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if ("да".equals(content)) {
                 return this.nextState();
             } else if ("нет".equals(content)) {
@@ -74,7 +77,7 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9]+([0-9 .]+)*$")) {
                 String[] res = content.split(" ");
 
@@ -84,6 +87,9 @@ public enum State implements IState {
 
                         if (resInt[0] >= ChatBotMessagesDB.AMOUNT_LOWER_BOUND && resInt[0] <= ChatBotMessagesDB.AMOUNT_HIGHER_BOUND
                                 && resInt[1] >= ChatBotMessagesDB.TERM_LOWER_BOUND && resInt[1] <= ChatBotMessagesDB.TERM_HIGHER_BOUND) {
+                            client.setCreditAmount(resInt[0]);
+                            client.setCreditTerm(resInt[1]);
+
                             return this.nextState();
                         }
 
@@ -105,12 +111,14 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9]+([0-9 .]+)*$")) {
                 try {
                     double res = Double.parseDouble(content);
 
                     if (res >= ChatBotMessagesDB.RATE_LOWER_BOUND && res <= ChatBotMessagesDB.RATE_HIGHER_BOUND) {
+                        client.setCreditRate(res);
+
                         return this.nextState();
                     }
                 } catch (NumberFormatException e) {
@@ -131,7 +139,7 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if ("да".equals(content)) {
                 return this.nextState();
             }
@@ -146,9 +154,17 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[а-я]+(?:[ -][а-я]+)*$")) {
-                return this.nextState();
+                String[] res = content.split(" ");
+
+                if (res.length == 3) {
+                    client.setFirstName(res[1]);
+                    client.setLastName(res[0]);
+                    client.setMiddleName(res[2]);
+
+                    return this.nextState();
+                }
             }
 
             return this.nextOnErrorState();
@@ -161,14 +177,24 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9]+([0-9а-я .;,-]+)*$")) {
                 String[] res = content.split("; ");
 
                 if (res.length == 3) {
-                    // TODO: save passportDate to repository
+                    try {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                        LocalDate date = LocalDate.parse(res[1], formatter);
+                        client.setPassportDate(date);
 
-                    return this.nextState();
+                        client.setPassportNum(res[0]);
+                        client.setPassportOrg(res[2]);
+
+                        return this.nextState();
+                    } catch (NumberFormatException | DateTimeParseException e) {
+                        System.err.println(e.getMessage());
+                        return this.nextOnErrorState();
+                    }
                 }
             }
 
@@ -182,7 +208,7 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9]+(?:[.][0-9]+)*$")) {
                 try {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -192,7 +218,7 @@ public enum State implements IState {
                     int age = Period.between(date, nowDate).getYears();
 
                     if (age > 21) {
-                        // TODO: save data to repo
+                        client.setBirthDate(date);
 
                         return this.nextState();
                     }
@@ -214,9 +240,9 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9]+([0-9]+)*$")) {
-                // TODO: save phone to repo
+                client.setPhone(content);
 
                 return this.nextState();
             }
@@ -231,9 +257,9 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9а-я]+([0-9а-я .;,-]+)*$")) {
-                // TODO: save address to repo
+                client.setAddress(content);
 
                 return this.nextState();
             }
@@ -248,9 +274,9 @@ public enum State implements IState {
         }
 
         @Override
-        public State processState(String content) {
+        public State processState(String content, Client client) {
             if (content.matches("^[0-9а-я]+([0-9а-я .;,-]+)*$")) {
-                // TODO: save address to repo
+                client.setJobInfo(content);
 
                 return this.nextState();
             }
@@ -259,6 +285,14 @@ public enum State implements IState {
         }
     },
     SUCCESS {
+        @Override
+        public State nextState() {
+            return SUCCESS;
+        }
 
+        @Override
+        public State processState(String content, Client client) {
+            return this.nextState();
+        }
     }
 }
