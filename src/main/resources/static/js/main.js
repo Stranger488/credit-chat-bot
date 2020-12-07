@@ -14,6 +14,9 @@ const start = () => {
 const makeConnection = () => {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
+
+    stompClient.debug = () => {}; // disable debug
+
     stompClient.connect({}, onConnection, onError);
 }
 
@@ -42,7 +45,7 @@ const onMessageReceived = (message) => {
     const msg = JSON.parse(message.body);
 
     if (msg.messageType === 'JOIN') {
-        console.log('Joined to the server.');
+        // console.log('Joined to the server.');
     }
 
     const msgContainer = document.createElement('div');

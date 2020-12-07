@@ -5,67 +5,86 @@ import com.example.creditchatbot.model.dto.ChatMessage;
 import com.example.creditchatbot.util.staticDB.ChatBotMessagesDB;
 import org.springframework.stereotype.Component;
 
+import static com.example.creditchatbot.util.ChatBotCommands.END_CMD;
+
 @Component
 public class ChatBot {
 
-    private State prevState;
-    private State currentState;
+    private ChatBotState prevChatBotState;
+    private ChatBotState currentChatBotState;
 
     public ChatBot() {
-        this.prevState = State.INIT;
-        this.currentState = State.JOIN;
+        this.prevChatBotState = ChatBotState.INIT;
+        this.currentChatBotState = ChatBotState.JOIN;
     }
 
-    public State getCurrentState() {
-        return currentState;
+    public ChatBotState getCurrentState() {
+        return currentChatBotState;
     }
 
-    public void setCurrentState(State currentState) {
-        this.currentState = currentState;
+    public void setCurrentState(ChatBotState currentChatBotState) {
+        this.currentChatBotState = currentChatBotState;
     }
 
     public String getCurrentMessage() {
-        return ChatBotMessagesDB.buildMessageFromState(currentState);
+        return ChatBotMessagesDB.buildMessageFromState(currentChatBotState);
     }
 
     public String getCurrentDeclineMessage() {
-        return ChatBotMessagesDB.buildDeclineMessageFromState(prevState);
+        return ChatBotMessagesDB.buildDeclineMessageFromState(prevChatBotState);
     }
 
-    public String getMsgByState(State state) {
-        return ChatBotMessagesDB.buildMessageFromState(state);
+    public String getMsgByState(ChatBotState chatBotState) {
+        return ChatBotMessagesDB.buildMessageFromState(chatBotState);
+    }
+
+    public boolean isBotCmdProceeded(String content, Client client) {
+        if (END_CMD.equals(content)) {
+            currentChatBotState = ChatBotState.END_SESSION;
+            client.setGeneratedUniqueName(null); // For deleting client from repo
+
+            return true;
+        }
+
+        return false;
     }
 
     public String processMsg(ChatMessage msg, Client client) {
         String content = msg.getContent().trim().toLowerCase();
 
-        State nextState = currentState.processState(content, client);
-        prevState = currentState;
-        setCurrentState(nextState);
+        if (!isBotCmdProceeded(content, client)) { // Do this only if it is not bot command
+            ChatBotState nextChatBotState = currentChatBotState.processState(content, client);
+            prevChatBotState = currentChatBotState;
+            setCurrentState(nextChatBotState);
 
-        if (currentState == State.DECLINE) {
-            client.setGeneratedUniqueName(null); // For deleting client from repo
+            if (currentChatBotState == ChatBotState.DECLINE) {
+                client.setGeneratedUniqueName(null); // For deleting client from repo
 
-            return getCurrentDeclineMessage() + getCurrentMessage();
-        } else if (currentState == State.INIT) {
-            String curMsg = getMsgByState(currentState); // Get init message
+                String declineMsg = getMsgByState(currentChatBotState); // Get decline message
 
-            this.nextState(); // Switch from INIT to CITY
+                this.nextState(); // Switch from DECLINE to END_SESSION
 
-            return curMsg + getCurrentMessage();
-        } else if (currentState == State.ERROR) {
-            String curMsg = getCurrentMessage();
+                return getCurrentDeclineMessage() + declineMsg + getCurrentMessage();
+            } else if (currentChatBotState == ChatBotState.INIT) {
+                String curMsg = getMsgByState(currentChatBotState); // Get init message
 
-            setCurrentState(prevState); // Switch to state, where error was handled
+                this.nextState(); // Switch from INIT to CITY
 
-            return curMsg + getCurrentMessage();
+                return curMsg + getCurrentMessage();
+            } else if (currentChatBotState == ChatBotState.ERROR) {
+                String curMsg = getCurrentMessage();
+
+                setCurrentState(prevChatBotState); // Switch to state, where error was handled
+
+                return curMsg + getCurrentMessage();
+            }
         }
 
         return getCurrentMessage();
     }
 
     public void nextState() {
-        State nextState = currentState.nextState();
-        setCurrentState(nextState);
+        ChatBotState nextChatBotState = currentChatBotState.nextState();
+        setCurrentState(nextChatBotState);
     }
 }

@@ -43,7 +43,7 @@ public class CreditChatBotService {
         chatBot.nextState(); // Switch from JOIN to INIT
         String responseInitString = chatBot.getCurrentMessage();
 
-        chatBot.nextState(); // Switch from INIT to IS_BANK_CLIENT
+        chatBot.nextState(); // Switch from INIT to CITY
         String responseFirstString = chatBot.getCurrentMessage();
 
         responseMsg.setMessageType(ChatMessage.MessageType.SEND);
@@ -59,11 +59,17 @@ public class CreditChatBotService {
     }
 
     public void sendBotMsgToUser(String userName, ChatMessage userMsg) {
-        Client client = clientRepository.findByGeneratedUniqueName(userName);
+        Client client = Objects.requireNonNull(clientRepository.findByGeneratedUniqueName(userName));
         ChatBot chatBot = chatBots.get(userName);
 
         String responseString = chatBot.processMsg(userMsg, client);
-        if (client.getGeneratedUniqueName() == null) {
+
+        ChatMessage responseMsg = new ChatMessage();
+        responseMsg.setSender("server");
+        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
+        responseMsg.setContent(responseString);
+
+        if (client.getGeneratedUniqueName() == null) { // DECLINE or END_SESSION state, need to finish the session
             clientRepository.delete(client);
 
             Client newClient = new Client();
@@ -72,11 +78,6 @@ public class CreditChatBotService {
         } else {
             clientRepository.save(client);
         }
-
-        ChatMessage responseMsg = new ChatMessage();
-        responseMsg.setSender("server");
-        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
-        responseMsg.setContent(responseString);
 
         simpMessagingTemplate.convertAndSendToUser(userName, "/channel", responseMsg);
     }
@@ -102,8 +103,8 @@ public class CreditChatBotService {
 
 //        System.out.println("User disconnected : " + username);
 
-        Client client = clientRepository.findByGeneratedUniqueName(userName);
-        if (client.getJobInfo() == null) {
+        Client client = Objects.requireNonNull(clientRepository.findByGeneratedUniqueName(userName));
+        if (client.getJobInfo() == null || client.getGeneratedUniqueName() == null) {
             clientRepository.delete(client);
         }
 
