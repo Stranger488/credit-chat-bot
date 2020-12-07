@@ -1,4 +1,4 @@
-package com.example.creditchatbot.model;
+package com.example.creditchatbot.model.dto;
 
 import java.security.Principal;
 import java.util.Objects;

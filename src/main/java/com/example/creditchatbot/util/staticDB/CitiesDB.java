@@ -1,17 +1,15 @@
-package com.example.creditchatbot.util;
+package com.example.creditchatbot.util.staticDB;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CitiesDB {
-    private static final List<String> citiesArrayList = new ArrayList<>(
-            Stream.of(
+    private static final List<String> citiesArrayList = Stream.of(
             "москва", "санкт-петербург", "ростов", "самара", "саратов",
-            "воронеж", "тамбов", "тюмень", "рязань", "ростов-на-дону"
-        ).collect(Collectors.toList())
-    );
+            "воронеж", "тамбов", "тюмень", "рязань", "ростов-на-дону",
+            "волгоград", "хабаровск"
+        ).collect(Collectors.toList());
 
     private CitiesDB() {
 

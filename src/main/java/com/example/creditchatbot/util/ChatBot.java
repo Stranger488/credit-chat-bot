@@ -1,6 +1,7 @@
 package com.example.creditchatbot.util;
 
-import com.example.creditchatbot.model.ChatMessage;
+import com.example.creditchatbot.model.dto.ChatMessage;
+import com.example.creditchatbot.util.staticDB.ChatBotMessagesDB;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,21 +23,19 @@ public class ChatBot {
         this.currentState = currentState;
     }
 
-    public String getCurrentMessage(MessageBuilder messageBuilder) {
-        return messageBuilder.buildMessageFromState(currentState);
+    public String getCurrentMessage() {
+        return ChatBotMessagesDB.buildMessageFromState(currentState);
     }
 
-    public String getCurrentDeclineMessage(MessageBuilder messageBuilder) {
-        return messageBuilder.buildDeclineMessageFromState(prevState);
+    public String getCurrentDeclineMessage() {
+        return ChatBotMessagesDB.buildDeclineMessageFromState(prevState);
     }
 
-    public String getMsgByState(MessageBuilder messageBuilder, State state) {
-        return messageBuilder.buildMessageFromState(state);
+    public String getMsgByState(State state) {
+        return ChatBotMessagesDB.buildMessageFromState(state);
     }
 
-
-
-    public String processMsg(ChatMessage msg, MessageBuilder msgBuilder) {
+    public String processMsg(ChatMessage msg) {
         String content = msg.getContent().trim().toLowerCase();
 
         State nextState = currentState.processState(content);
@@ -44,23 +43,23 @@ public class ChatBot {
         setCurrentState(nextState);
 
         if (currentState == State.DECLINE) {
-            String curMsg = getCurrentMessage(msgBuilder);
-            return getCurrentDeclineMessage(msgBuilder)+ curMsg;
+            String curMsg = getCurrentMessage();
+            return getCurrentDeclineMessage() + curMsg;
         } else if (currentState == State.INIT) {
-            String curMsg = getMsgByState(msgBuilder, currentState); // Get init message
+            String curMsg = getMsgByState(currentState); // Get init message
 
             this.nextState(); // Switch from INIT to IS_BANK_CLIENT
 
-            return curMsg + getCurrentMessage(msgBuilder);
+            return curMsg + getCurrentMessage();
         } else if (currentState == State.ERROR) {
-            String curMsg = getCurrentMessage(msgBuilder);
+            String curMsg = getCurrentMessage();
 
             setCurrentState(prevState); // Switch to state, where error was handled
 
-            return curMsg + getCurrentMessage(msgBuilder);
+            return curMsg + getCurrentMessage();
         }
 
-        return getCurrentMessage(msgBuilder);
+        return getCurrentMessage();
     }
 
     public void nextState() {

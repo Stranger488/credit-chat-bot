@@ -1,6 +1,6 @@
 package com.example.creditchatbot.controller;
 
-import com.example.creditchatbot.model.ChatMessage;
+import com.example.creditchatbot.model.dto.ChatMessage;
 import com.example.creditchatbot.service.CreditChatBotService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;

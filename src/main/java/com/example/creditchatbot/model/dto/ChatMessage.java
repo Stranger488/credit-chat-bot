@@ -1,4 +1,4 @@
-package com.example.creditchatbot.model;
+package com.example.creditchatbot.model.dto;
 
 public class ChatMessage {
     private MessageType messageType;
