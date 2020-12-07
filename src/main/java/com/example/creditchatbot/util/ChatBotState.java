@@ -8,7 +8,8 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
+
+import static com.example.creditchatbot.util.ChatBotCommonConstants.*;
 
 public enum ChatBotState implements IChatBotState {
 
@@ -46,7 +47,7 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[а-я]+(?:[ -][а-я]+)*$")) {
+            if (content.matches(REGEX_NAME)) {
                 if (CitiesDB.isInDb(content)) {
                     client.setCity(content);
 
@@ -62,21 +63,48 @@ public enum ChatBotState implements IChatBotState {
     CHECK_CLIENT {
         @Override
         public ChatBotState nextState() {
-            return AMOUNT_TERM;
+            return AMOUNT;
         }
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if ("да".equals(content)) {
+            if (YES_ANSWER.equals(content)) {
                 return this.nextState();
-            } else if ("нет".equals(content)) {
+            } else if (NO_ANSWER.equals(content)) {
                 return this.nextDeclineState();
             }
 
             return this.nextOnErrorState();
         }
     },
-    AMOUNT_TERM {
+    AMOUNT {
+        public ChatBotState nextState() {
+            return TERM;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_NUM)) {
+                try {
+                    int res = Integer.parseInt(content);
+
+                    if (res >= ChatBotMessagesDB.AMOUNT_LOWER_BOUND && res <= ChatBotMessagesDB.AMOUNT_HIGHER_BOUND) {
+                        client.setCreditAmount(res);
+
+                        return this.nextState();
+                    }
+
+                    return this.nextDeclineState();
+                } catch (NumberFormatException e) {
+                    System.err.println(e.getMessage());
+                    return this.nextOnErrorState();
+                }
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    TERM {
         @Override
         public ChatBotState nextState() {
             return RATE;
@@ -84,26 +112,20 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9]+([0-9 .]+)*$")) {
-                String[] res = content.split(" ");
+            if (content.matches(REGEX_NUM)) {
+                try {
+                    int res = Integer.parseInt(content);
 
-                if (res.length == 2) {
-                    try {
-                        int[] resInt = Arrays.stream(res).mapToInt(Integer::parseInt).toArray();
+                    if (res >= ChatBotMessagesDB.TERM_LOWER_BOUND && res <= ChatBotMessagesDB.TERM_HIGHER_BOUND) {
+                        client.setCreditTerm(res);
 
-                        if (resInt[0] >= ChatBotMessagesDB.AMOUNT_LOWER_BOUND && resInt[0] <= ChatBotMessagesDB.AMOUNT_HIGHER_BOUND
-                                && resInt[1] >= ChatBotMessagesDB.TERM_LOWER_BOUND && resInt[1] <= ChatBotMessagesDB.TERM_HIGHER_BOUND) {
-                            client.setCreditAmount(resInt[0]);
-                            client.setCreditTerm(resInt[1]);
-
-                            return this.nextState();
-                        }
-
-                        return this.nextDeclineState();
-                    } catch (NumberFormatException e) {
-                        System.err.println(e.getMessage());
-                        return this.nextOnErrorState();
+                        return this.nextState();
                     }
+
+                    return this.nextDeclineState();
+                } catch (NumberFormatException e) {
+                    System.err.println(e.getMessage());
+                    return this.nextOnErrorState();
                 }
             }
 
@@ -118,7 +140,7 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9]+([0-9 .]+)*$")) {
+            if (content.matches(REGEX_DOUBLE_NUM)) {
                 try {
                     double res = Double.parseDouble(content);
 
@@ -141,42 +163,111 @@ public enum ChatBotState implements IChatBotState {
     USER_AGREE {
         @Override
         public ChatBotState nextState() {
-            return NAME_DATA;
+            return LAST_NAME;
         }
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if ("да".equals(content)) {
+            if (YES_ANSWER.equals(content)) {
                 return this.nextState();
             }
 
             return this.nextDeclineState();
         }
     },
-    NAME_DATA {
+    LAST_NAME {
         @Override
         public ChatBotState nextState() {
-            return PASSPORT_DATA;
+            return FIRST_NAME;
         }
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[а-я]+(?:[ -][а-я]+)*$")) {
-                String[] res = content.split(" ");
+            if (content.matches(REGEX_NAME)) {
+                client.setLastName(content);
 
-                if (res.length == 3) {
-                    client.setFirstName(res[1]);
-                    client.setLastName(res[0]);
-                    client.setMiddleName(res[2]);
+                return this.nextState();
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    FIRST_NAME {
+        @Override
+        public ChatBotState nextState() {
+            return MIDDLE_NAME;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_NAME)) {
+                client.setFirstName(content);
+
+                return this.nextState();
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    MIDDLE_NAME {
+        @Override
+        public ChatBotState nextState() {
+            return PASSPORT_DATE;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_NAME)) {
+                client.setMiddleName(content);
+
+                return this.nextState();
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    PASSPORT_DATE {
+        @Override
+        public ChatBotState nextState() {
+            return PASSPORT_NUM;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_DATE)) {
+                try {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                    LocalDate date = LocalDate.parse(content, formatter);
+                    client.setPassportDate(date);
 
                     return this.nextState();
+                } catch (NumberFormatException | DateTimeParseException e) {
+                    System.err.println(e.getMessage());
+                    return this.nextOnErrorState();
                 }
             }
 
             return this.nextOnErrorState();
         }
     },
-    PASSPORT_DATA {
+    PASSPORT_NUM {
+        @Override
+        public ChatBotState nextState() {
+            return PASSPORT_ORG;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_NUM)) {
+                client.setPassportNum(content);
+
+                return this.nextState();
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    PASSPORT_ORG {
         @Override
         public ChatBotState nextState() {
             return BIRTH_DATE;
@@ -184,24 +275,10 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9]+([0-9а-я .;,-]+)*$")) {
-                String[] res = content.split("; ");
+            if (content.matches(REGEX_FREE_TEXT)) {
+                client.setPassportOrg(content);
 
-                if (res.length == 3) {
-                    try {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-                        LocalDate date = LocalDate.parse(res[1], formatter);
-                        client.setPassportDate(date);
-
-                        client.setPassportNum(res[0]);
-                        client.setPassportOrg(res[2]);
-
-                        return this.nextState();
-                    } catch (NumberFormatException | DateTimeParseException e) {
-                        System.err.println(e.getMessage());
-                        return this.nextOnErrorState();
-                    }
-                }
+                return this.nextState();
             }
 
             return this.nextOnErrorState();
@@ -215,7 +292,7 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9]+(?:[.][0-9]+)*$")) {
+            if (content.matches(REGEX_DATE)) {
                 try {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
                     LocalDate date = LocalDate.parse(content, formatter);
@@ -247,7 +324,7 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9]+([0-9]+)*$")) {
+            if (content.matches(REGEX_NUM)) {
                 client.setPhone(content);
 
                 return this.nextState();
@@ -259,12 +336,12 @@ public enum ChatBotState implements IChatBotState {
     ADDRESS {
         @Override
         public ChatBotState nextState() {
-            return JOB_INFO;
+            return JOB_PLACE;
         }
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9а-я]+([0-9а-я .;,-]+)*$")) {
+            if (content.matches(REGEX_FREE_TEXT)) {
                 client.setAddress(content);
 
                 return this.nextState();
@@ -273,7 +350,41 @@ public enum ChatBotState implements IChatBotState {
             return this.nextOnErrorState();
         }
     },
-    JOB_INFO {
+    JOB_PLACE {
+        @Override
+        public ChatBotState nextState() {
+            return JOB_POSITION;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_FREE_TEXT)) {
+                client.setJobPlace(content);
+
+                return this.nextState();
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    JOB_POSITION {
+        @Override
+        public ChatBotState nextState() {
+            return JOB_EXP;
+        }
+
+        @Override
+        public ChatBotState processState(String content, Client client) {
+            if (content.matches(REGEX_FREE_TEXT)) {
+                client.setJobPosition(content);
+
+                return this.nextState();
+            }
+
+            return this.nextOnErrorState();
+        }
+    },
+    JOB_EXP {
         @Override
         public ChatBotState nextState() {
             return SUCCESS;
@@ -281,8 +392,8 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            if (content.matches("^[0-9а-я]+([0-9а-я .;,-]+)*$")) {
-                client.setJobInfo(content);
+            if (content.matches(REGEX_FREE_TEXT)) {
+                client.setJobExp(content);
 
                 return this.nextState();
             }

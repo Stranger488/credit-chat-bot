@@ -113,7 +113,7 @@ public class CreditChatBotService {
         // Handle exception that omits because of using in-memory db
         try {
             Client client = Objects.requireNonNull(clientRepository.findByGeneratedUniqueName(userName));
-            if (client.getJobInfo() == null || client.getGeneratedUniqueName() == null) {
+            if (client.getJobExp() == null || client.getGeneratedUniqueName() == null) {
                 clientRepository.delete(client);
             }
         } catch (SQLGrammarException e) {

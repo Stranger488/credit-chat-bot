@@ -5,7 +5,7 @@ import com.example.creditchatbot.model.dto.ChatMessage;
 import com.example.creditchatbot.util.staticDB.ChatBotMessagesDB;
 import org.springframework.stereotype.Component;
 
-import static com.example.creditchatbot.util.ChatBotCommands.END_CMD;
+import static com.example.creditchatbot.util.ChatBotCommonConstants.END_CMD;
 
 @Component
 public class ChatBot {

@@ -44,7 +44,13 @@ public class Client {
     private String address;
 
     @Column
-    private String jobInfo;
+    private String jobPlace;
+
+    @Column
+    private String jobPosition;
+
+    @Column
+    private String jobExp;
 
     @Column
     private int creditAmount;
@@ -149,12 +155,28 @@ public class Client {
         this.address = address;
     }
 
-    public String getJobInfo() {
-        return jobInfo;
+    public String getJobPlace() {
+        return jobPlace;
     }
 
-    public void setJobInfo(String jobInfo) {
-        this.jobInfo = jobInfo;
+    public void setJobPlace(String jobPlace) {
+        this.jobPlace = jobPlace;
+    }
+
+    public String getJobPosition() {
+        return jobPosition;
+    }
+
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
+    }
+
+    public String getJobExp() {
+        return jobExp;
+    }
+
+    public void setJobExp(String jobExp) {
+        this.jobExp = jobExp;
     }
 
     public int getCreditAmount() {
@@ -208,12 +230,14 @@ public class Client {
                 Objects.equals(passportDate, client.passportDate) &&
                 Objects.equals(passportOrg, client.passportOrg) &&
                 Objects.equals(address, client.address) &&
-                Objects.equals(jobInfo, client.jobInfo) &&
+                Objects.equals(jobPlace, client.jobPlace) &&
+                Objects.equals(jobPosition, client.jobPosition) &&
+                Objects.equals(jobExp, client.jobExp) &&
                 Objects.equals(city, client.city);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, generatedUniqueName, firstName, lastName, middleName, birthDate, phone, passportNum, passportDate, passportOrg, address, jobInfo, creditAmount, creditTerm, creditRate, city);
+        return Objects.hash(id, generatedUniqueName, firstName, lastName, middleName, birthDate, phone, passportNum, passportDate, passportOrg, address, jobPlace, jobPosition, jobExp, creditAmount, creditTerm, creditRate, city);
     }
 }
