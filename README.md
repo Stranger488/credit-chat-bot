@@ -74,3 +74,6 @@ cd credit-chat-bot
 mvn package
 java -jar target/credit-chat-bot-0.0.1-SNAPSHOT
 ```
+
+Приложение доступно по адресу *http://localhost:8080*
+Консоль *H2* доступна по адресу *http://localhost:8080/h2*
