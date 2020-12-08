@@ -1,4 +1,6 @@
-package com.example.creditchatbot.model.dto;
+package com.example.creditchatbot.model;
+
+import java.util.Objects;
 
 public class ChatMessage {
     private MessageType messageType;
@@ -11,12 +13,6 @@ public class ChatMessage {
     }
 
     public ChatMessage() {
-    }
-
-    public ChatMessage(String sender, String content, MessageType messageType) {
-        this.messageType = messageType;
-        this.sender = sender;
-        this.content = content;
     }
 
     public MessageType getMessageType() {
@@ -41,5 +37,20 @@ public class ChatMessage {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChatMessage that = (ChatMessage) o;
+        return messageType == that.messageType &&
+                Objects.equals(sender, that.sender) &&
+                Objects.equals(content, that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messageType, sender, content);
     }
 }

@@ -85,7 +85,7 @@ body {
     width: 75%;
     text-align: center;
     padding: 15px;
-    height: 400px;
+    height: 68vh;
     overflow-y: scroll;
 }
 
@@ -123,10 +123,6 @@ body {
 
 .chat-message-right {
     background: var(--light-color);
-}
-
-.chat-message-username {
-
 }
 
 .connecting {

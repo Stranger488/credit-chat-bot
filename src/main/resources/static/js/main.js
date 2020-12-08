@@ -70,9 +70,7 @@ const onMessageReceived = (message) => {
         msgContainer.classList.add('chat-message-container-right');
         msgDiv.classList.add('chat-message-right');
     } else {
-        nameSpan.innerHTML = 'Неизвестный';
-        msgContainer.classList.add('chat-message-container-left');
-        msgDiv.classList.add('chat-message-left');
+        msgContainer.removeChild(msgDiv);
     }
 
     chatContent.scrollTop = chatContent.scrollHeight;

@@ -1,7 +1,7 @@
 package com.example.creditchatbot.service;
 
 import com.example.creditchatbot.model.Client;
-import com.example.creditchatbot.model.dto.ChatMessage;
+import com.example.creditchatbot.model.ChatMessage;
 import com.example.creditchatbot.repository.ClientRepository;
 import com.example.creditchatbot.util.ChatBot;
 import org.hibernate.exception.SQLGrammarException;
@@ -65,11 +65,6 @@ public class CreditChatBotService {
 
         String responseString = chatBot.processMsg(userMsg, client);
 
-        ChatMessage responseMsg = new ChatMessage();
-        responseMsg.setSender("server");
-        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
-        responseMsg.setContent(responseString);
-
         if (client.getGeneratedUniqueName() == null) { // DECLINE or END_SESSION state, need to finish the session
             clientRepository.delete(client);
 
@@ -79,6 +74,11 @@ public class CreditChatBotService {
         } else {
             clientRepository.save(client);
         }
+
+        ChatMessage responseMsg = new ChatMessage();
+        responseMsg.setSender("server");
+        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
+        responseMsg.setContent(responseString);
 
         simpMessagingTemplate.convertAndSendToUser(userName, "/channel", responseMsg);
     }

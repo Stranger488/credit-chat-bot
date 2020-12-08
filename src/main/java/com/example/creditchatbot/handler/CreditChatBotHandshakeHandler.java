@@ -1,6 +1,6 @@
 package com.example.creditchatbot.handler;
 
-import com.example.creditchatbot.model.dto.AnonymousUserPrincipal;
+import com.example.creditchatbot.model.AnonymousUserPrincipal;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;

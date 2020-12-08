@@ -1,4 +1,4 @@
-package com.example.creditchatbot.model.dto;
+package com.example.creditchatbot.model;
 
 import java.security.Principal;
 import java.util.Objects;
@@ -8,6 +8,11 @@ public class AnonymousUserPrincipal implements Principal {
 
     public AnonymousUserPrincipal(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -21,10 +26,5 @@ public class AnonymousUserPrincipal implements Principal {
     @Override
     public int hashCode() {
         return Objects.hash(name);
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }

@@ -17,7 +17,7 @@ public class ChatBotCommonConstants {
     public static final String YES_ANSWER = "да";
     public static final String NO_ANSWER = "нет";
 
-    private ChatBotCommonConstants() {
 
+    private ChatBotCommonConstants() {
     }
 }

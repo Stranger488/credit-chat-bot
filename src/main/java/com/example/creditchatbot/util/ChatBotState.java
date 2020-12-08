@@ -14,7 +14,6 @@ import static com.example.creditchatbot.util.ChatBotCommonConstants.*;
 public enum ChatBotState implements IChatBotState {
 
     JOIN {
-
     },
     DECLINE {
         @Override
@@ -23,10 +22,8 @@ public enum ChatBotState implements IChatBotState {
         }
     },
     END_SESSION {
-
     },
     ERROR {
-
     },
     INIT {
         @Override
@@ -409,7 +406,7 @@ public enum ChatBotState implements IChatBotState {
 
         @Override
         public ChatBotState processState(String content, Client client) {
-            return this.nextState();
+            return SUCCESS;
         }
     }
 }
