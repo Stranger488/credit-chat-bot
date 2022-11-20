@@ -2,6 +2,7 @@ package com.example.creditchatbot.controller;
 
 import com.example.creditchatbot.model.ChatMessage;
 import com.example.creditchatbot.service.CreditChatBotService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
@@ -9,13 +10,10 @@ import org.springframework.stereotype.Controller;
 import java.security.Principal;
 
 @Controller
+@RequiredArgsConstructor
 public class CreditChatBotController {
 
     private final CreditChatBotService creditChatBotService;
-
-    public CreditChatBotController(CreditChatBotService creditChatBotService) {
-        this.creditChatBotService = creditChatBotService;
-    }
 
     @MessageMapping("/join")
     public ChatMessage joinUser(@Payload ChatMessage chatMessage, Principal principal) {

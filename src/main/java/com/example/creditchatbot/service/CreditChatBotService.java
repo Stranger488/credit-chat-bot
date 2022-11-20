@@ -4,11 +4,13 @@ import com.example.creditchatbot.model.Client;
 import com.example.creditchatbot.model.ChatMessage;
 import com.example.creditchatbot.repository.ClientRepository;
 import com.example.creditchatbot.util.ChatBot;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.SQLGrammarException;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class CreditChatBotService {
 
     private final ClientRepository clientRepository;
@@ -23,22 +26,18 @@ public class CreditChatBotService {
 
     private final HashMap<String, ChatBot> chatBots = new HashMap<>();
 
-    public CreditChatBotService(SimpMessagingTemplate simpMessagingTemplate, ClientRepository clientRepository) {
-        this.simpMessagingTemplate = simpMessagingTemplate;
-        this.clientRepository = clientRepository;
-    }
-
     public void addUserAndSendWelcome(String userUniqueName) {
         ChatBot chatBot = chatBots.get(userUniqueName);
 
         String responseWelcomeString = chatBot.getCurrentMessage();
 
-        ChatMessage responseMsg = new ChatMessage();
-        responseMsg.setSender("server");
-        responseMsg.setMessageType(ChatMessage.MessageType.JOIN);
-        responseMsg.setContent(responseWelcomeString);
+        ChatMessage responseMsgJoin = ChatMessage.builder()
+                .sender("server")
+                .messageType(ChatMessage.MessageType.JOIN)
+                .content(responseWelcomeString)
+                .build();
 
-        simpMessagingTemplate.convertAndSendToUser(userUniqueName, "/channel", responseMsg);
+        simpMessagingTemplate.convertAndSendToUser(userUniqueName, "/channel", responseMsgJoin);
 
 
         chatBot.nextState(); // Switch from JOIN to INIT
@@ -47,10 +46,13 @@ public class CreditChatBotService {
         chatBot.nextState(); // Switch from INIT to CITY
         String responseFirstString = chatBot.getCurrentMessage();
 
-        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
-        responseMsg.setContent(responseInitString + responseFirstString);
+        ChatMessage responseMsgSend = ChatMessage.builder()
+                .sender("server")
+                .messageType(ChatMessage.MessageType.SEND)
+                .content(responseInitString + responseFirstString)
+                .build();
 
-        simpMessagingTemplate.convertAndSendToUser(userUniqueName, "/channel", responseMsg);
+        simpMessagingTemplate.convertAndSendToUser(userUniqueName, "/channel", responseMsgSend);
     }
 
     public void sendUserMsgToChannel(String userName, ChatMessage msg) {
@@ -75,21 +77,21 @@ public class CreditChatBotService {
             clientRepository.save(client);
         }
 
-        ChatMessage responseMsg = new ChatMessage();
-        responseMsg.setSender("server");
-        responseMsg.setMessageType(ChatMessage.MessageType.SEND);
-        responseMsg.setContent(responseString);
-
+        ChatMessage responseMsg = ChatMessage.builder()
+                .sender("server")
+                .messageType(ChatMessage.MessageType.SEND)
+                .content(responseString)
+                .build();
         simpMessagingTemplate.convertAndSendToUser(userName, "/channel", responseMsg);
     }
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String userName = Objects.requireNonNull(headerAccessor.getUser()).getName();
+        String userName = getUserNameFromEvent(event);
 
-        Client newClient = new Client();
-        newClient.setGeneratedUniqueName(userName);
+        Client newClient = Client.builder()
+                .generatedUniqueName(userName)
+                .build();
         clientRepository.save(newClient);
 
         chatBots.put(userName, new ChatBot());
@@ -99,8 +101,7 @@ public class CreditChatBotService {
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String userName = Objects.requireNonNull(headerAccessor.getUser()).getName();
+        String userName = getUserNameFromEvent(event);
 
         // For usual persistent db
         /*
@@ -124,4 +125,10 @@ public class CreditChatBotService {
 
         //        System.out.println("User disconnected : " + username);
     }
+
+    public String getUserNameFromEvent(AbstractSubProtocolEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        return Objects.requireNonNull(headerAccessor.getUser()).getName();
+    }
+
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class CreditChatBotHandshakeHandler extends DefaultHandshakeHandler {
+
     @Override
     protected Principal determineUser(ServerHttpRequest request,
                                       WebSocketHandler wsHandler,
@@ -22,4 +23,5 @@ public class CreditChatBotHandshakeHandler extends DefaultHandshakeHandler {
 
         return principal;
     }
+
 }
