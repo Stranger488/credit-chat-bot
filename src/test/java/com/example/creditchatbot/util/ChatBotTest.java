@@ -6,14 +6,12 @@ import com.example.creditchatbot.util.staticDB.ChatBotMessagesDB;
 import com.example.creditchatbot.util.staticDB.CitiesDB;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.util.UUID;
 
 import static com.example.creditchatbot.util.ChatBotCommonConstants.END_CMD;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 class ChatBotTest {
 
@@ -49,7 +47,7 @@ class ChatBotTest {
                 "join",
                 ChatBotState.JOIN,
                 ChatBotMessagesDB.buildMessageFromState(ChatBotState.INIT)
-                + ChatBotMessagesDB.buildMessageFromState(ChatBotState.CITY)
+                        + ChatBotMessagesDB.buildMessageFromState(ChatBotState.CITY)
         );
     }
 
@@ -87,7 +85,7 @@ class ChatBotTest {
                 "123Некорректный город",
                 ChatBotState.CITY,
                 ChatBotMessagesDB.buildMessageFromState(ChatBotState.ERROR)
-                + ChatBotMessagesDB.buildMessageFromState(ChatBotState.CITY)
+                        + ChatBotMessagesDB.buildMessageFromState(ChatBotState.CITY)
         );
     }
 
@@ -118,7 +116,7 @@ class ChatBotTest {
      * Общий метод для проверки processMsg для разных состояний
      */
     private Client processMsg(ChatMessage.MessageType type, String content,
-                            ChatBotState state, String messageExpected) {
+                              ChatBotState state, String messageExpected) {
         ChatMessage chatMessage = ChatMessage.builder()
                 .messageType(type)
                 .sender("client")

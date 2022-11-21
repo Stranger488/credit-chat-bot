@@ -15,7 +15,7 @@ public class ChatBotMessagesDB {
     private ChatBotMessagesDB() {
     }
 
-    private static final HashMap<ChatBotState, String> chatBotPhrases = new HashMap<ChatBotState, String>() {{
+    private static final HashMap<ChatBotState, String> chatBotPhrases = new HashMap<>() {{
         put(
             ChatBotState.JOIN,
             "Вас приветствует чат-бот для оформления заявки на потребительский кредит!</br> "
